@@ -9,5 +9,5 @@ import java.util.ArrayList;
 @Repository
 public interface StockRepository extends CrudRepository<Stock, Integer> {
     ArrayList<Stock> findAll();
-//    ArrayList<Stock> findById(int id);
+
 }
