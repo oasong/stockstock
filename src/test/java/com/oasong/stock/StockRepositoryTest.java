@@ -41,6 +41,7 @@ public class StockRepositoryTest {
     public void findById(){
         Stock stock = stockRepository.findById(2).get();
         assertEquals(2, stock.getId());
+        assertEquals("Android Jumkad", stock.getName());
     }
 
 

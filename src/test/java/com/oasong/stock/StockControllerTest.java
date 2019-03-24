@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.*;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest (webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,25 +41,50 @@ public class StockControllerTest {
         data2.setStatus("NOT OK");
         data2.setQuantity(2000);
 
+        Stock data3 = new Stock();
+        data3.setDate("24/8/97");
+        data3.setName("Android Jumkad");
+        data3.setPrice(15000.75);
+        data3.setStatus("NOT OK");
+        data3.setQuantity(2000);
+
         stockRepository.save(data1);
         stockRepository.save(data2);
+        stockRepository.save(data3);
+    }
+
+    @After
+    public void clearData(){
+        stockRepository.deleteAll();
     }
 
     @Test
     public void getStock(){
-        Stock stock = testRestTemplate.getForObject("/stocks/1", Stock.class);
-//        assertEquals(1, stock.getId());
-        assertEquals("Apple Jumkad", stock.getName());
-        assertEquals("19/4/98", stock.getDate());
-        assertEquals(25000.25, stock.getPrice(), 0.00);
-        assertEquals("OK", stock.getStatus());
-        assertEquals(4000, stock.getQuantity());
+        ResponseEntity<Stock> responseEntity = testRestTemplate.getForEntity("/stocks/1", Stock.class);
+
+        assertEquals(1, responseEntity.getBody().getId());
+        assertEquals("Apple Jumkad", responseEntity.getBody().getName());
+        assertEquals("19/4/98", responseEntity.getBody().getDate());
+        assertEquals(25000.25, responseEntity.getBody().getPrice(), 0.00);
+        assertEquals("OK", responseEntity.getBody().getStatus());
+        assertEquals(4000, responseEntity.getBody().getQuantity());
+    }
+
+    @Test
+    public void getStock2(){
+        ResponseEntity<Stock> responseEntity = testRestTemplate.getForEntity("/stocks/2", Stock.class);
+        assertEquals(2, responseEntity.getBody().getId());
+        assertEquals("Android Jumkad", responseEntity.getBody().getName());
+        assertEquals("24/8/97", responseEntity.getBody().getDate());
+        assertEquals(15000.75, responseEntity.getBody().getPrice(), 0.00);
+        assertEquals("NOT OK", responseEntity.getBody().getStatus());
+        assertEquals(2000, responseEntity.getBody().getQuantity());
     }
 
     @Test
     public void getStocks(){
         ArrayList<Stock> stocks = testRestTemplate.getForObject("/stocks", ArrayList.class);
-        assertEquals(2, stocks.size());
+        assertEquals(3, stocks.size());
     }
 
     @Test
@@ -84,14 +110,11 @@ public class StockControllerTest {
         ArrayList<Stock> stocks = stockRepository.findAll();
         int stockSize = stocks.size();
         int stockLastId = stocks.get(stockSize - 1).getId();
-        testRestTemplate.delete("/stocks/" + stockLastId);
-
-        assertEquals(1, stockRepository.count());
+        Optional<Stock> stock = stockRepository.findById(stockLastId);
+        stockRepository.delete(stock.get());
+        assertEquals(2, stockRepository.count());
     }
 
-    @After
-    public void clearData(){
-        stockRepository.deleteAll();
-    }
+
 
 }
